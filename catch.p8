@@ -74,7 +74,6 @@ function _draw()
 	spr(jelpi,52,20+dy)
 		-- jelpi sad
 	if(y1>100) status="lost" pset(54,24,12) pset(57,24,12)
-	printh(status)
 	-- chopstick closing
 	if cs==1 then
 	 a-=0.02
