@@ -18,7 +18,7 @@ __lua__
  variable (1..15, integer):
 ]]--
 
-difficulty = 5
+difficulty = 1
 
 --[[
  set all of your variables
@@ -27,34 +27,28 @@ difficulty = 5
 function _init()
  -- these are required!
  name,made_by,oneliner="save sugar cube!","cpiod","avoid the rain ⬅️➡️"
- 
- outer_frame_color,inner_frame_color,status,t,lt,sx,sprouts,drops,a,x,s=1,6,"won",0,0,nil,{},{},rnd(0.03)-0.015,60,{0,25,-10,45,5,35,-10,80}
+ outer_frame_color,inner_frame_color,status,t,lt,sx,sprouts,drops,a,x,s,tlost=1,6,"won",0,0,nil,{},{},rnd(0.03)-0.015,60,{0,25,-10,45,5,35,-10,80},nil
  for i=1,15 do
-  add(sprouts,{x=rnd(120),dx=rnd(5)-2,y=94-rnd(3),m=rnd()<.5})
+  add(sprouts,{x=rnd(128),dx=rnd(5)-2,y=94-rnd(3)})
  end
 end
 
 function _update60()
- 
- if(t-lt>0.2) lt=t add(drops,{y=0,x=rnd(128)})
+ -- add raindrop
+ if(t-lt>0.2) lt=t add(drops,{y=0,x=8+rnd(112)})
 
- --[[
-  dt is time delta, scaled
-  with difficulty, provided by
-  the master cart
- ]]--
  local dt=dt or 0.0167
  
  vy=-90*dt
 
- -- drops moving
+ -- raindrops moving
  for d in all(drops) do
   d.y-=vy*cos(a)
   d.x-=vy*sin(a)
  end
 
  -- controls
- if status!="lost" then 
+ if not tlost then 
   if btn(⬅️) then
    m=true
   elseif btn(➡️) then
@@ -63,11 +57,17 @@ function _update60()
   
   -- player moving
   if m then
-   x-=60*dt
-   if(x<14) m=false
+   if x<14 then
+    m=false
+   else
+    x-=60*dt
+   end
   else
-   x+=60*dt
-   if(x>106) m=true
+   if x>97 then
+    m=true
+   else
+    x+=60*dt
+   end
   end
 
    -- collision check
@@ -84,7 +84,7 @@ function _draw()
  cls(1)
  
  -- add thunder
- if(not sx and rnd()>0.98) sx=30+rnd(70) st=t+0.4 cls(7)
+ if(not sx and rnd()>0.98) sx,st=30+rnd(70),t+0.4 cls(7)
 
  palt(14,true)
  palt(0,false)
@@ -108,8 +108,8 @@ function _draw()
  end
  
  --clouds
- for y=-10,10,10 do
-  for x=-100,200,20 do
+ for y=0,10,10 do
+  for x=-100,200,25 do
    sspr(0,0,16,8,x+y*5,y+x%3,32,16,x*y%9<=4)
   end
  end
@@ -118,7 +118,7 @@ function _draw()
  rectfill(0,96,128,128,4)
 
  -- player animation
- if status=="lost" then
+ if tlost then
   sspr2(4+flr(4*(min(.9,t-tlost)%1)),x,80,m)
  else
   a1=m and -4 or 4
