@@ -42,9 +42,11 @@ function _update60()
  vy=-90*dt
 
  -- raindrops moving
+ dvy=vy*cos(a)
+ dvx=vy*sin(a)
  for d in all(drops) do
-  d.y-=vy*cos(a)
-  d.x-=vy*sin(a)
+  d.y-=dvy
+  d.x-=dvx
  end
 
  -- controls
@@ -104,7 +106,7 @@ function _draw()
  
  --drops
  for d in all(drops) do
-  circfill(d.x,d.y,1,12)
+  line(d.x,d.y,d.x-dvx,d.y-dvy,12)
  end
  
  --clouds
