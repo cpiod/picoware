@@ -57,13 +57,13 @@ function _update60()
   
   -- player moving
   if m then
-   if x<14 then
+   if x<10 then
     m=false
    else
     x-=60*dt
    end
   else
-   if x>97 then
+   if x>101 then
     m=true
    else
     x+=60*dt
@@ -72,7 +72,7 @@ function _update60()
 
    -- collision check
   for d in all(drops) do
-   if(d.y>=82 and d.y<=94 and d.x>=x+2 and d.x<=x+14) status="lost" tlost=t
+   if(d.y>=82 and d.y<=94 and d.x>=x+2 and d.x<=x+14) status="lost" tlost=t sfx(1)
   end
  end
 

@@ -27,7 +27,8 @@ difficulty = 1
 function _init()
  -- these are required!
  name,made_by,oneliner="catch the bar","cpiod","catch 🅾️"
- outer_frame_color,inner_frame_color,t,s,tdrop,bary,a,c,cs,jelpi=5,6,0,0,.5+rnd(2.5),25,0,0,0
+ --drop time: 0.7s min, 3.5s max
+ outer_frame_color,inner_frame_color,t,s,tdrop,bary,a,c,cs,jelpi,status=5,6,0,0,.7+rnd(2.8),25,0,0,0,nil
  -- s is the bar status:
  -- s=0 at start
  -- s=1 droped
@@ -61,20 +62,8 @@ function _update60()
   -- player control
   if(btnp(🅾️)) cs=1
  end
-end
-
-function _draw()
- cls(1)
- -- jelpi hand
- if(s==0) line(57,25,60,25,15)
  
- -- jelpi happy
- dy= s==2 and abs(4*sin(1.5*t)) or 0
- -- jelpi
-	spr(jelpi,52,20+dy)
-		-- jelpi sad
-	if(y1>100) status="lost" pset(54,24,12) pset(57,24,12)
-	-- chopstick closing
+ 	-- chopstick closing
 	if cs==1 then
 	 a-=0.02
  	-- check closed
@@ -83,9 +72,26 @@ function _draw()
  	 -- check win condition
  	 if y1<100 and y2>100 then
   	 s,status=2,"won"
+  	 sfx(0)
  	 end
  	end
 	end
+	
+	-- check lose
+	if(y1>100 and status!="lost") status="lost" sfx(1)
+end
+
+function _draw()
+ cls(1)
+ -- jelpi hand
+ if(s==0) line(57,25,60,25,15)
+
+ -- jelpi happy
+ dy= s==2 and abs(4*sin(1.5*t)) or 0
+ -- jelpi
+	spr(jelpi,52,20+dy)
+		-- jelpi sad
+	if(status=="lost") pset(54,24,12) pset(57,24,12)
 
 	x,y=20*sin(a),80+20*cos(a)
 	-- bar
