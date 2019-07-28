@@ -18,7 +18,7 @@ __lua__
  variable (1..15, integer):
 ]]--
 
-difficulty = 1
+difficulty = 5
 
 --[[
  set all of your variables
@@ -26,47 +26,12 @@ difficulty = 1
 ]]--
 function _init()
  -- these are required!
- name="save sugar cube!"
- made_by="cpiod"
- oneliner="avoid the rain ⬅️➡️"
+ name,made_by,oneliner="save sugar cube!","cpiod","avoid the rain ⬅️➡️"
  
- -- add a personal touch ◆
- outer_frame_color=1
- inner_frame_color=6
-
- --[[
-  set status variable to inform
-  master cart about outcome:
- 
-  status="won" / status="lost"
- ]]--
- status="won"
- t=0 
- lt=0
- sx=nil
- sprouts={}
- nb=10+rnd(10)
- for i=1,nb do
-  add(sprouts,{x=rnd(120),dx=rnd(5)-2,y=2+rnd(3),m=rnd(2)<1})
+ outer_frame_color,inner_frame_color,status,t,lt,sx,sprouts,drops,a,x,s=1,6,"won",0,0,nil,{},{},rnd(0.03)-0.015,60,{0,25,-10,45,5,35,-10,80}
+ for i=1,15 do
+  add(sprouts,{x=rnd(120),dx=rnd(5)-2,y=94-rnd(3),m=rnd()<.5})
  end
- 
-  -- player
- drops={}
- a=rnd(0.03)-0.015
- y=80
- x=60
- frame=2
- s={0,10,-10,30,5,20,-10,65}
- --[[
-  you could use the difficulty
-  variable to change things
-  with difficulty. example:
-  
-  obstacle_count = difficulty/5
-  
-  remember that difficulty goes
-  from 1 to 15.
- ]]--
 end
 
 function _update60()
@@ -78,99 +43,91 @@ function _update60()
   with difficulty, provided by
   the master cart
  ]]--
- local dt=dt or 1/60
+ local dt=dt or 0.0167
+ 
  vy=-90*dt
-  
+
+ -- drops moving
  for d in all(drops) do
   d.y-=vy*cos(a)
   d.x-=vy*sin(a)
  end
 
+ -- controls
  if status!="lost" then 
-  if(btn(⬅️)) m=true
-  if(btn(➡️)) m=false
-  if(m) x-=60*dt
-  if(not m) x+=60*dt
-  if(x<8) x=8 m=false
-  if(x>112) x=112 m=true
+  if btn(⬅️) then
+   m=true
+  elseif btn(➡️) then
+   m=false
+  end
+  
+  -- player moving
+  if m then
+   x-=60*dt
+   if(x<14) m=false
+  else
+   x+=60*dt
+   if(x>106) m=true
+  end
+
+   -- collision check
+  for d in all(drops) do
+   if(d.y>=82 and d.y<=94 and d.x>=x+2 and d.x<=x+14) status="lost" tlost=t
+  end
  end
- --[[
-  use dt for all diff.dependent
-  actions, and 1/60 otherwise
- ]]--
+
  t+=dt
- 
- -- animation magic
- if status=="lost" then
-  frame=17
- else
-  frame=2+flr(5*(2*t%1))
- end
- --[[
-  use transition_done to check
-  for on-screen collisions etc;
-  this flag is set to true when
-  the screen transition is over
-  and the game is fully drawn
-  on the screen
- ]]--
- if not transition_done then
-  return
- end
 
- for d in all(drops) do
-  if(status!="lost" and d.y>=y+4 and d.y<=y+12 and d.x>=x+4 and d.x<=x+12) status="lost" tlost=t
- end
 end
-
-
 
 function _draw()
  cls(1)
  
- if(not sx and rnd()>0.995) sx=30+rnd(70) st=t+0.4 cls(7)
+ -- add thunder
+ if(not sx and rnd()>0.98) sx=30+rnd(70) st=t+0.4 cls(7)
 
  palt(14,true)
  palt(0,false)
 
+ --thunder
  if sx then
-  for k=-1,1 do
-   for i=1,5,2 do
-    c=k==0 and 7 or 10
-    line(s[i]+sx+k,s[i+1]+15,s[i+2]+sx+k,s[i+3]+15,c)
-   end
+  for i=1,5,2 do
+   line(s[i]+sx,s[i+1],s[i+2]+sx,s[i+3],7)
   end
   if(t>st) sx=nil
  end
  
+ --sprouts
  for s in all(sprouts) do
-  line(s.x,96,s.x+s.dx,96-s.y,3)
+  line(s.x,96,s.x+s.dx,s.y,3)
  end
  
+ --drops
  for d in all(drops) do
   circfill(d.x,d.y,1,12)
  end
  
- for x=-30,200,45 do
-  sspr(0,0,16,8,x,0,32,16,x%3==0)
+ --clouds
+ for y=-10,10,10 do
+  for x=-100,200,20 do
+   sspr(0,0,16,8,x+y*5,y+x%3,32,16,x*y%9<=4)
+  end
  end
- for x=-30,200,30 do
-  sspr(0,0,16,8,x,10,32,16,x%3==0)
- end
- 
+
+ -- soil
  rectfill(0,96,128,128,4)
 
- -- player
+ -- player animation
  if status=="lost" then
-  sspr2(7+flr(4*(min(.9,t-tlost)%1)),x,y,m)
+  sspr2(4+flr(4*(min(.9,t-tlost)%1)),x,80,m)
  else
-  a1,a2=0,0
-  if(m) a1=-8 a2=8
-  a3=0
-  if(frame==4 or frame==5) a3=-1
-  sspr2(11,x+4+a1,y-8,t%.3>.15)
-  sspr2(frame,x,y,m)
-  sspr2(11,x-4+a2,y-8+a3,(t+.05)%.3<.15)
+  a1=m and -4 or 4
+  -- arm behind
+  sspr2(8,x+a1,72,t%.3>.15)
+  -- player
+  sspr2(2+2*(2*t%1),x,80,m)
+  -- arm front
+  sspr2(8,x-a1,72,t%.4<.2)
  end
 end
 
@@ -557,14 +514,14 @@ _states={
 
 
 __gfx__
-eeeeeeeeee000eeeeeeeeeeeeeeeeeeeee677eeeee677eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000000000000000000000000
-eee00eeee05550eeee677eeeee677eee6677677e6677677eee677eeeeeee7eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000000000000000000000000
-ee05500e0555550e6677677e6677677e7657737e7657737e6677677ee6e76eeeeee7eeeeeeeeeeeeeeeeeeeeeee5eeee00000000000000000000000000000000
-ee0555505555550e7657737e7657737e6657776e6657776e7657737e7667787ee6677eeeeeeeeeeeeeeeeeeeeeee5eee00000000000000000000000000000000
-e0555555555555506657776e6657776e6767677e6767677e6657776e6667776e6667776eee6eeeeeeeeeeeeeeeee5eee00000000000000000000000000000000
-05555555555555506767677e6767677eee6775eee5677eee6767677e6767677e6767677ee6677eeeeeeeeeeeeeee5eee00000000000000000000000000000000
-e055555555555550ee677eeeee6775eee5eeeeeeeeeee5eee5677eeeee677eeeee677eee676767eee6eeeeeeeeee5eee00000000000000000000000000000000
-ee0000000000000eee5e5eeeee5eeeeeeeeeeeeeeeeeeeeeeeee5eeeee5e5eeeee5e5eeeee677eee676e677eeeeeeeee00000000000000000000000000000000
+eeeeeeeeee000eeeeeeeeeeeee677eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000000000000000000000000000000000000000000000000
+eee00eeee05550eeee677eee6677677eeeee7eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000000000000000000000000000000000000000000000000000
+ee05500e0555550e6677677e7657737ee6e76eeeeee7eeeeeeeeeeeeeeeeeeeeeee5eeee00000000000000000000000000000000000000000000000000000000
+ee0555505555550e7657737e6657776e7667787ee6677eeeeeeeeeeeeeeeeeeeeeee5eee00000000000000000000000000000000000000000000000000000000
+e0555555555555506657776e6767677e6667776e6667776eee6eeeeeeeeeeeeeeeee5eee00000000000000000000000000000000000000000000000000000000
+05555555555555506767677eee6775ee6767677e6767677ee6677eeeeeeeeeeeeeee5eee00000000000000000000000000000000000000000000000000000000
+e055555555555550ee677eeee5eeeeeeee677eeeee677eee676767eee6eeeeeeeeee5eee00000000000000000000000000000000000000000000000000000000
+ee0000000000000eee5e5eeeeeeeeeeeee5e5eeeee5e5eeeee677eee676e677eeeeeeeee00000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
