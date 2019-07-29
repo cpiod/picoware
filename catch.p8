@@ -1,8 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
--- picoware template cart
--- the picoware team
+-- picoware: catch the bar!
+-- cpiod and the picoware team
 
 --[[
  to disable the preview script
@@ -27,8 +27,8 @@ difficulty = 1
 function _init()
  -- these are required!
  name,made_by,oneliner="catch the bar","cpiod","catch 🅾️"
- --drop time: 0.7s min, 3.5s max
- outer_frame_color,inner_frame_color,t,s,tdrop,bary,a,c,cs,jelpi,status=5,6,0,0,.7+rnd(2.8),25,0,0,0,nil
+ --drop time: 1s min, 3.5s max
+ outer_frame_color,inner_frame_color,t,s,tdrop,bary,a,c,cs,jelpi,status=5,6,0,0,1+rnd(2.5),25,0,0,0,nil
  -- s is the bar status:
  -- s=0 at start
  -- s=1 droped
@@ -58,14 +58,14 @@ function _update60()
  
  if(cs==0 and t>0.5) then
 	 -- animation at the beginning
-	 if(a<0.1) a+=0.02
+	 if(a<0.1) a+=0.04
   -- player control
   if(btnp(🅾️)) cs=1
  end
  
  	-- chopstick closing
 	if cs==1 then
-	 a-=0.02
+	 a-=0.04
  	-- check closed
  	if a<=0.01 then
  	 a,cs=0,2
@@ -97,8 +97,8 @@ function _draw()
 	-- bar
 	line(60,y1,60,y2,8)
 	-- chopsticks
- line(65,80,60-x,y,7)
- line(55,80,60+x,y,7)
+ line(60-x,y,65,80,7)
+ line(60+x,y,55,80,7)
 end
 
 --------------------------------
